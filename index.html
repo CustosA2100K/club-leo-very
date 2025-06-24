@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verificación de Socio Leo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdfdfd;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background-color: #800000;
+      color: white;
+      padding: 1rem;
+      width: 100%;
+      text-align: center;
+    }
+    main {
+      margin-top: 2rem;
+      width: 90%;
+      max-width: 600px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 2rem;
+      border-radius: 8px;
+    }
+    img.logo {
+      width: 100px;
+      display: block;
+      margin: 0 auto 1rem;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .socio-info {
+      margin-top: 1rem;
+    }
+    footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Club Leo Las Matas de Farfán</h1>
+    <p>Asociación Internacional de Clubes de Leones</p>
+  </header>
+
+  <main>
+    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Leo_Club_Logo.png" alt="Logo Leo" />
+    <h2>Verificación de Certificado</h2>
+
+    <form id="verificacion-form">
+      <label for="codigo">Ingrese el código de socio:</label><br>
+      <input type="text" id="codigo" name="codigo" required />
+      <button type="submit">Verificar</button>
+    </form>
+
+    <div id="resultado" class="socio-info"></div>
+  </main>
+
+  <footer>
+    Club Leo Las Matas de Farfán - Distrito Leo R-3
+  </footer>
+
+  <script>
+    document.getElementById("verificacion-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const codigoIngresado = document.getElementById("codigo").value.trim();
+      const resultado = document.getElementById("resultado");
+      resultado.innerHTML = "Verificando...";
+
+      fetch("https://api.sheetbest.com/sheets/0b4c54c9-eda4-4bf5-a0f0-149c8b85255a")
+        .then(res => res.json())
+        .then(data => {
+          const socio = data.find(s => s.codigo === codigoIngresado);
+          if (socio) {
+            resultado.innerHTML = `
+              <p class="success">ESTA CARTA ES VÁLIDA. EL SOCIO PERTENECE OFICIALMENTE A LA ASOCIACIÓN INTERNACIONAL DE CLUBES DE LEONES, PROGRAMA INTERNACIONAL DE CLUBES LEO, DISTRITO LEO R-3.</p>
+              <img src="${socio.foto}" alt="Foto del socio" style="width:100px; border-radius:8px;" />
+              <ul>
+                <li><strong>Nombre:</strong> ${socio.nombre}</li>
+                <li><strong>Código:</strong> ${socio.codigo}</li>
+                <li><strong>Fecha de ingreso:</strong> ${socio.fechaIngreso}</li>
+                <li><strong>Estado:</strong> ${socio.estado}</li>
+                <li><strong>Cargo:</strong> ${socio.cargo}</li>
+                <li><strong>Horas de servicio:</strong> ${socio.horas}</li>
+              </ul>
+            `;
+          } else {
+            resultado.innerHTML = `
+              <p class="error">El código ingresado no corresponde a un socio registrado o el certificado no es válido.<br>
+              SI NO ES ASÍ, PÓNGASE EN CONTACTO CON EL ASESOR DE AFILIACIÓN.</p>
+            `;
+          }
+        })
+        .catch(error => {
+          resultado.innerHTML = "<p class='error'>Error al conectar con la base de datos. Intente nuevamente.</p>";
+          console.error("Error de conexión:", error);
+        });
+    });
+  </script>
+</body>
+</html>
